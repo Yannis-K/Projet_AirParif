@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Projet AirParif</title>
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin=""
+        />
+        <!-- Make sure you put this AFTER Leaflet's CSS -->
+        <script
+            src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""
+        ></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                height: 100vh;
+                background-color: #f7f7f7;
+            }
+
+            .main-container {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                width: 100%;
+                max-width: none;
+                margin-top: 20px;
+                padding: 0 20px;
+            }
+            #testAPI {
+                width: 60%;
+                overflow-y: auto;
+                margin-right: 20px;
+                margin-left: 10%;
+            }
+
+            #map {
+                width: 60%;
+                height: 500px;
+                margin-left: 5%;
+                margin-top: 2%;
+                border: solid;
+            }
+
+            .button-container {
+                width: 35%;
+                text-align: center;
+                margin-left: 5%;
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: center;
+            }
+
+            .button-container button {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                margin: 0 10px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .button-container button:hover {
+                background-color: #45a049;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                border: solid;
+            }
+
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+
+            thead {
+                background-color: #f2f2f2;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+
+            tr:hover {
+                background-color: #e8e8e8;
+            }
+
+            th {
+                font-weight: bold;
+            }
+
+            td {
+                transition: background-color 0.3s ease;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main-container">
+            <div id="map"></div>
+            <div id="testAPI">
+                <div class="button-container">
+                    <button id="todayButton" class="btn btn-primary">
+                        Aujourd'hui
+                    </button>
+                    <button id="tomorrowButton" class="btn btn-secondary">
+                        Demain
+                    </button>
+                </div>
+                <!-- Tableau -->
+            </div>
+        </div>
+
+        <script>
+
+
+                    var tab =
+                    [["75101",[[48.861946, 2.350248],
+                                [48.869600, 2.325895],
+                                [48.863557, 2.321264],
+                                [48.859972, 2.333021],
+                                [48.853870, 2.344306]]],
+                    ["75102",[[48.861946, 2.350248],
+                                [48.869370, 2.354491],
+                                [48.872076, 2.339999],
+                                [48.869600, 2.325895]]],
+                    ["75103",[[48.861946, 2.350248],
+                                [48.859973, 2.356795],
+                                [48.855798, 2.368370],
+                                [48.867484, 2.364057],
+                                [48.869370, 2.354491]]],
+                    ["75104",[[48.844120, 2.365351],
+                                [48.849171, 2.358637],
+                                [48.853870, 2.344306],
+                                [48.861946, 2.350248],
+                                [48.859973, 2.356795],
+                                [48.855798, 2.368370],
+                                [48.852950, 2.369427]]],
+                    ["75105",[[48.853870, 2.344306],
+                                [48.839867, 2.336398],
+                                [48.83839009769637,2.3414163269670896],
+                                [48.836700, 2.351888],
+                                [48.839796, 2.362107],
+                                [48.844120, 2.365351],
+                                [48.849171, 2.358637]]],
+                    ["75106",[[48.859972, 2.333021],
+                                [48.846820, 2.316696],
+                                [48.84337644314808, 2.324442955302235],
+                                [48.839867, 2.336398],
+                                [48.853870, 2.344306],]],
+                    ["75107",[[48.864086, 2.301695],
+                                [48.865182, 2.300059],
+                                [48.857558, 2.290674],
+                                [48.847126, 2.307343],
+                                [48.847875, 2.310507],
+                                [48.845913, 2.313728],
+                                [48.846820, 2.316696],
+                                [48.859972, 2.333021],
+                                [48.863557, 2.321264],
+                                [48.864421, 2.318551]]],
+                    ["75108",[[48.883943, 2.327584],
+                                [48.881303, 2.316522],
+                                [48.880420, 2.308971],
+                                [48.878067, 2.298168],
+                                [48.874213, 2.294793],
+                                [48.865182, 2.300059],
+                                [48.864086, 2.301695],
+                                [48.864421, 2.318551],
+                                [48.863557, 2.321264],
+                                [48.869600, 2.325895]]],
+                    ["75109",[[48.883114, 2.349717],
+                                [48.882140, 2.339809],
+                                [48.883943, 2.327584],
+                                [48.869600, 2.325895],
+                                [48.872076, 2.339999],
+                                [48.870692, 2.347929]]],
+                    ["75110",[[48.872083, 2.377326],
+                                [48.884710, 2.365826],
+                                [48.883114, 2.349717],
+                                [48.870692, 2.347929],
+                                [48.867484, 2.364057]]],
+                    ["75111",[[48.852950, 2.369427],
+                                [48.848557, 2.399028],
+                                [48.858401, 2.389879],
+                                [48.872083, 2.377326],
+                                [48.867484, 2.364057]]],
+                    ["75112",[[48.844120, 2.365351],
+                                [48.826183, 2.387249],
+                                [48.834829, 2.410165],
+                                [48.846307, 2.414681],
+                                [48.852950, 2.369427]]],
+                    ["75113",[[48.83839009769637,2.3414163269670896],
+                                [48.82652940988097,2.3403019291841565],
+                                [48.816956090578145,2.3459466487015224],
+                                [48.826183, 2.387249],
+                                [48.844120, 2.365351],
+                                [48.839796, 2.362107],
+                                [48.836700, 2.351888]]],
+                    ["75114",[[48.84337644314808, 2.324442955302235],
+                                [48.825655664543554, 2.3017296791491892],
+                                [48.816956090578145,2.3459466487015224],
+                                [48.82652940988097,2.3403019291841565],
+                                [48.83839009769637,2.3414163269670896]]],
+                    ["75115",[[48.857558, 2.290674],
+                                [48.834295, 2.262023],
+                                [48.834713, 2.267691],
+                                [48.832992, 2.269997],
+                                [48.831540, 2.267344],
+                                [48.827992, 2.267704],
+                                [48.827984, 2.273007],
+                                [48.832502, 2.279157],
+                                [48.827324, 2.292534],
+                                [48.825655664543554, 2.3017296791491892],
+                                [48.84337644314808, 2.324442955302235],
+                                [48.846820, 2.316696],
+                                [48.845913, 2.313728],
+                                [48.847875, 2.310507],
+                                [48.847126, 2.307343]]],
+                    ["75116",[[48.865182, 2.300059],
+                                [48.874213, 2.294793],
+                                [48.878708, 2.279879],
+                                [48.841792, 2.254500],
+                                [48.835065, 2.255869],
+                                [48.834295, 2.262023]]],
+                    ["75117",[[48.883943, 2.327584],
+                                [48.887538, 2.325642],
+                                [48.900760, 2.330588],
+                                [48.900661, 2.320356],
+                                [48.889875, 2.295252],
+                                [48.889839, 2.292816],
+                                [48.882865, 2.280913],
+                                [48.878708, 2.279879],
+                                [48.874213, 2.294793],
+                                [48.878067, 2.298168],
+                                [48.880420, 2.308971],
+                                [48.881303, 2.316522]]],
+                    ["75118",[[48.884710, 2.365826],
+                                [48.901428, 2.370901],
+                                [48.900760, 2.330588],
+                                [48.887538, 2.325642],
+                                [48.883943, 2.327584],
+                                [48.882140, 2.339809]]],
+                    ["75119",[[48.878279, 2.410617],
+                                [48.883006, 2.400419],
+                                [48.900099, 2.390962],
+                                [48.901428, 2.370901],
+                                [48.884710, 2.365826],
+                                [48.872083, 2.377326] ]],
+                    ["75120",[[48.848557, 2.399028],
+                                [48.846307, 2.414681],
+                                [48.878279, 2.410617],
+                                [48.872083, 2.377326]]]];
+
+                     var map = L.map('map').setView([48.866667, 2.333333], 12);
+                     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }).addTo(map);
+
+
+
+
+
+
+
+
+
+                    function createTable() {
+                const table = document.createElement("table");
+                const thead = document.createElement("thead");
+                const tbody = document.createElement("tbody");
+                tbody.id = "tableBody"; // Ajout d'un ID
+
+                const headerRow = document.createElement("tr");
+                const headers = ["Arrondissement", "NO2", "O3", "PM10", "PM2.5", "SO2", "Indice"];
+                headers.forEach(headerText => {
+                    const header = document.createElement("th");
+                    header.textContent = headerText;
+                    headerRow.appendChild(header);
+                });
+
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                table.appendChild(tbody);
+
+                return table;
+            }
+
+
+            document.getElementById("testAPI").appendChild(createTable());
+
+            for (let index = 0; index < tab.length; index++) {
+
+
+            }
+
+
+
+            function estPointDansPolygone(point, polygone) {
+                var x = point[0], y = point[1];
+
+                var dedans = false;
+                for (var i = 0, j = polygone.length - 1; i < polygone.length; j = i++) {
+                    var xi = polygone[i][0], yi = polygone[i][1];
+                    var xj = polygone[j][0], yj = polygone[j][1];
+
+                    var intersect = ((yi > y) != (yj > y))
+                        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                    if (intersect) dedans = !dedans;
+                }
+
+                return dedans;
+            }
+
+            function trouverZonePourPoint(point, zones) {
+                for (var i = 0; i < zones.length; i++) {
+                    var codeZone = zones[i][0];
+                    var polygone = zones[i][1];
+
+                    if (estPointDansPolygone(point, polygone)) {
+                        return codeZone; // Retourne le code de la zone pour le point
+                    }
+                }
+                return null; // Retourne null si le point n'est pas dans une zone
+            }
+
+            function calculerCentrePolygone(polygone) {
+                var x = 0, y = 0, n = polygone.length;
+                for (var i = 0; i < n; i++) {
+                    x += polygone[i][0];
+                    y += polygone[i][1];
+                }
+                return [x / n, y / n];
+            }
+
+            function distanceEntrePoints(point1, point2) {
+                var dx = point1[0] - point2[0];
+                var dy = point1[1] - point2[1];
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            function trouverZoneLaPlusProche(point, zones) {
+                var zoneLaPlusProche = null;
+                var distanceMinimale = Infinity;
+
+                for (var i = 0; i < zones.length; i++) {
+                    var centreZone = calculerCentrePolygone(zones[i][1]);
+                    var distance = distanceEntrePoints(point, centreZone);
+                    if (distance < distanceMinimale) {
+                        distanceMinimale = distance;
+                        zoneLaPlusProche = zones[i][0];
+                    }
+                }
+
+                return zoneLaPlusProche;
+            }
+
+            function incrementCompteurZoneProche(point, zones, compteurs, nb) {
+                var codeZone = trouverZonePourPoint(point, zones) || trouverZoneLaPlusProche(point, zones);
+                for (var i = 0; i < compteurs.length; i++) {
+                    if (compteurs[i][0] === codeZone) {
+                        compteurs[i][1] += nb;
+                        break;
+                    }
+                }
+            }
+
+            var compte_Voit = [
+                ["75101", 0],
+                ["75102", 0],
+                ["75103", 0],
+                ["75104", 0],
+                ["75105", 0],
+                ["75106", 0],
+                ["75107", 0],
+                ["75108", 0],
+                ["75109", 0],
+                ["75110", 0],
+                ["75111", 0],
+                ["75112", 0],
+                ["75113", 0],
+                ["75114", 0],
+                ["75115", 0],
+                ["75116", 0],
+                ["75117", 0],
+                ["75118", 0],
+                ["75119", 0],
+                ["75120", 0]
+            ];
+            var lat;
+            var lon
+            var url_Reverse;
+            for(let j = 0; j < 1500; j = j + 99){
+                for (let i = 0; i < 100; i++) {
+
+
+
+            url2 = "https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/comptages-routiers-permanents/records?limit=100&offset="+j+"&refine=t_1h%3A%222023%22"
+                        fetch(url2)
+                            .then(data => data.json())
+                            .then(data => {
+
+
+
+                                for (let i = 0; i < 100; i++) {
+
+                                    lat = data["results"][i]["geo_point_2d"]["lat"];
+                                    lon = data["results"][i]["geo_point_2d"]["lon"];
+                                    var point = [lat, lon];
+
+
+                                    incrementCompteurZoneProche(point, tab, compte_Voit,data["results"][0]["q"]);
+
+
+
+                                }
+
+
+                            });
+                        }
+                    }
+
+                    function calculerCentresDesArrondissements(tab) {
+                return tab.map(arrondissement => {
+                    const coords = arrondissement[1];
+                    let sommeX = 0, sommeY = 0;
+
+                    coords.forEach(point => {
+                        sommeX += point[0];
+                        sommeY += point[1];
+                    });
+
+                    const centreX = sommeX / coords.length;
+                    const centreY = sommeY / coords.length;
+
+                    return [arrondissement[0], [centreX, centreY]];
+                });
+            }
+
+            var centres = calculerCentresDesArrondissements(tab);
+
+            for (let h = 0; h < centres.length; h++) {
+                const element = centres[h];
+
+
+            }
+
+
+                        const apiKey = "b9c0db50-9cee-5822-4c7d-c4954388d625";
+
+                        async function fetchAvecPause() {
+                            for (let i = 0; i < tab.length; i++) {
+                                const element = tab[i][0];
+
+                                const url = "https://api.airparif.fr/indices/prevision/commune?insee=" + element;
+
+                                await fetch(url, {
+                                    method: "GET",
+                                    headers: {
+                                        "X-Api-Key": apiKey
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                const row = document.createElement("tr");
+
+                // Création des cellules avec couleur
+                const createCell = (val, isArrondissement) => {
+                    const cell = document.createElement("td");
+
+                    // Choisir la couleur en fonction du texte
+                            if (!isArrondissement){
+                                cell.textContent = val;
+
+                            if (val === "Bon") {
+                                cell.style.backgroundColor = "rgba(0, 128, 0, 0.8)";
+                            } else if (val === "Moyen") {
+                                cell.style.backgroundColor = "rgba(255, 165, 0, 0.8)";
+                            } else {
+                                cell.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+                            }
+
+                            }
+                            else{
+                                cell.style.backgroundColor = "white";
+                                cell.textContent = val;
+                            }
+                    return cell;
+
+                };
+
+
+
+
+                // Ajouter les cellules à la ligne
+                row.appendChild(createCell(element, true));
+                row.appendChild(createCell(data[tab[i][0]][0]["no2"], false));
+                row.appendChild(createCell(data[tab[i][0]][0]["o3"], false));
+                row.appendChild(createCell(data[tab[i][0]][0]["pm10"], false));
+                row.appendChild(createCell(data[tab[i][0]][0]["pm25"], false));
+                row.appendChild(createCell(data[tab[i][0]][0]["so2"], false));
+                row.appendChild(createCell(data[tab[i][0]][0]["indice"], false));
+
+                document.getElementById("tableBody").appendChild(row);
+
+
+
+                function testColor(val) {
+                if (val === "Bon") {
+                    return  "rgba(0, 128, 0, 0.8)";
+                } else if (val === "Moyen") {
+                    return "rgba(255, 165, 0, 0.8)";
+                } else {
+                    return "rgba(255, 0, 0, 0.8)";
+                }
+
+            }
+
+
+
+
+                document.getElementById("todayButton").addEventListener("click", () => {
+                var rows = document.querySelectorAll("#tableBody tr");
+
+
+
+                rows.forEach((row, index) => {
+                    if (tab[index]) {
+
+
+                        // Mettre à jour les cellules avec les nouvelles valeurs
+                        row.cells[1].textContent = data[tab[i][0]][0]["no2"];
+                        row.cells[1].style.backgroundColor = testColor(data[tab[i][0]][0]["no2"]);
+                        row.cells[2].textContent = data[tab[i][0]][0]["o3"];
+                        row.cells[2].style.backgroundColor = testColor(data[tab[i][0]][0]["o3"]);
+                        row.cells[3].textContent = data[tab[i][0]][0]["pm10"];
+                        row.cells[3].style.backgroundColor = testColor(data[tab[i][0]][0]["pm10"]);
+                        row.cells[4].textContent = data[tab[i][0]][0]["pm25"];
+                        row.cells[4].style.backgroundColor = testColor(data[tab[i][0]][0]["pm25"]);
+                        row.cells[5].textContent = data[tab[i][0]][0]["so2"];
+                        row.cells[5].style.backgroundColor = testColor(data[tab[i][0]][0]["so2"]);
+                        row.cells[6].textContent = data[tab[i][0]][0]["indice"];
+                        row.cells[6].style.backgroundColor = testColor(data[tab[i][0]][0]["indice"]);
+                    }
+                });
+            });
+
+
+
+            document.getElementById("tomorrowButton").addEventListener("click", () => {
+                var rows = document.querySelectorAll("#tableBody tr");
+
+
+                var rows = document.querySelectorAll("#tableBody tr");
+
+                rows.forEach((row, index) => {
+                    if (tab[index]) {
+                        const arrondissementData = tab[index];
+
+
+                        // Mettre à jour les cellules avec les nouvelles valeurs
+                        row.cells[1].textContent = data[tab[i][0]][1]["no2"];
+                        row.cells[1].style.backgroundColor = testColor(data[tab[i][0]][1]["no2"]);
+                        row.cells[2].textContent = data[tab[i][0]][1]["o3"];
+                        row.cells[2].style.backgroundColor = testColor(data[tab[i][0]][1]["o3"]);
+                        row.cells[3].textContent = data[tab[i][0]][1]["pm10"];
+                        row.cells[3].style.backgroundColor = testColor(data[tab[i][0]][1]["pm10"]);
+                        row.cells[4].textContent = data[tab[i][0]][1]["pm25"];
+                        row.cells[4].style.backgroundColor = testColor(data[tab[i][0]][1]["pm25"]);
+                        row.cells[5].textContent = data[tab[i][0]][1]["so2"];
+                        row.cells[5].style.backgroundColor = testColor(data[tab[i][0]][1]["so2"]);
+                        row.cells[6].textContent = data[tab[i][0]][1]["indice"];
+                        row.cells[6].style.backgroundColor = testColor(data[tab[i][0]][1]["indice"]);
+                    }
+                });
+            });
+
+
+
+
+
+                                    if(data[tab[i][0]][0]["indice"] === "Moyen")
+                                        color = 'orange';
+                                    else if(data[tab[i][0]][0]["indice"] === 'Bon')
+                                        color = 'green';
+                                    else
+                                        color = 'red';
+
+                                    if (compte_Voit[i][1] < 500000){
+                                        icon = "vert.png";
+                                        label = "Fluide";
+                                    }
+                                    else if (compte_Voit[i][1] < 1000000){
+                                        icon = "orange.png";
+                                        label = "Ralenti";
+                                    }
+                                    else{
+                                        icon = "rouge.png";
+                                        label = "Forte Affluence"
+                                    }
+
+                                    var greenIcon = L.icon({
+                iconUrl: icon,
+
+
+                iconSize:     [38, 65],
+
+                iconAnchor:   [22, 64],
+
+
+            });
+            L.marker(centres[i][1], {icon: greenIcon}).addTo(map);
+                                    L.polygon([
+                                        tab[i][1]
+                                        ]).setStyle({fillColor: color, fillOpacity: 0.8}).bindPopup('no2 : '+data[tab[i][0]][0]["no2"]+
+                                                                                                    '<br>'+'o3 : '+data[tab[i][0]][0]["o3"]+
+                                                                                                    '<br>'+'pm10 : '+data[tab[i][0]][0]["pm10"]+
+                                                                                                    '<br>'+'pm25 : '+data[tab[i][0]][0]["pm25"]+
+                                                                                                    '<br>'+'so2 : '+data[tab[i][0]][0]["so2"]+
+                                                                                                    '<br>'+'Indice : '+data[tab[i][0]][0]["indice"]+
+                                                                                                    '<br>'+'Trafic : '+label).addTo(map);
+                                 });
+
+
+
+
+                                await new Promise(resolve => setTimeout(resolve, 10));
+                            }
+                        }
+
+
+
+                        fetchAvecPause();
+        </script>
+    </body>
+</html>
